@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>lab2</title>
+</head>
+<body>
+  <h1>Sweep Counting Attack</h1>
+  <button id="collect">collect</button>
+  <pre id="status"></pre>
+  <script>
+    const status = document.getElementById('status');
+    const worker = new Worker('collect.js');
+    worker.onmessage = e => {
+      const trace = e.data;
+      status.textContent = 'done: ' + trace.length + 'samples';
+      const blob = new Blob([JSON.stringify(trace)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'trace_' + Date.now() + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    document.getElementById('collect').onclick = () => {
+      status.textContent = 'counting...';
+      worker.postMessage('start');
+    };
+  </script>
+</body>
+</html>
